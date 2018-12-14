@@ -56,7 +56,7 @@ cp togo/ducc/rpms/src/*.rpm rpms/
 echo "Creating package map"
 mkdir -p pkgmap
 PKGMAP_FILE=pkgmap/pkgmap.cc7_x86_64
-PACKAGE_NAME=cvmfs-ducc-${VERSION}-${RELEASE}.x86_64.rpm
+PACKAGE_NAME=ducc-${VERSION}-${RELEASE}.x86_64.rpm
 echo "[cc7_x86_64]" >> ${PKGMAP_FILE}
 echo "ducc=${PACKAGE_NAME}" >> ${PKGMAP_FILE}
 
