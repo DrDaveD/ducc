@@ -24,6 +24,7 @@ func init() {
 var convertCmd = &cobra.Command{
 	Use:   "convert",
 	Short: "Convert the wishes",
+	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		AliveMessage()
 		defer lib.ExecCommand("docker", "system", "prune", "--force", "--all")
