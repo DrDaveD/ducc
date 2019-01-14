@@ -293,23 +293,6 @@ func ConvertWish(wish WishFriendly, convertAgain, forceDownload, convertSingular
 		RegistryAuth: authCredential,
 	}
 
-	res, err := dockerClient.ImagePush(
-		context.Background(),
-		outputImage.GetSimpleName(),
-		pushOptions)
-	if err != nil {
-		return
-	}
-	b, _ := ioutil.ReadAll(res)
-	fmt.Println(string(b))
-	defer res.Close()
-	// here is possible to use the result of the above ReadAll to have
-	// informantion about the status of the upload.
-	_, err = ioutil.ReadAll(res)
-	if err != nil {
-		return
-	}
-	Log().Info("Finish pushing the image to the registry")
 	// we wait for the goroutines to finish
 	// and if there was no error we add everything to the converted table
 	noErrorInConversionValue := <-noErrorInConversion
@@ -330,9 +313,29 @@ func ConvertWish(wish WishFriendly, convertAgain, forceDownload, convertSingular
 	}
 
 	if noErrorInConversionValue {
+
+		res, errImgPush := dockerClient.ImagePush(
+			context.Background(),
+			outputImage.GetSimpleName(),
+			pushOptions)
+		if errImgPush != nil {
+			err = fmt.Errorf("Error in pushing the image: ", errImgPush)
+			return err
+		}
+		b, _ := ioutil.ReadAll(res)
+		fmt.Println(string(b))
+		defer res.Close()
+		// here is possible to use the result of the above ReadAll to have
+		// informantion about the status of the upload.
+		_, errReadDocker := ioutil.ReadAll(res)
+		if err != nil {
+			LogE(errReadDocker).Warning("Error in reading the status from docker")
+		}
+		Log().Info("Finish pushing the image to the registry")
+
 		manifestPath := filepath.Join(".metadata", inputImage.GetSimpleName(), "manifest.json")
 		errIng := IngestIntoCVMFS(wish.CvmfsRepo, manifestPath, <-manifestChanell)
-		if err != nil {
+		if errIng != nil {
 			LogE(errIng).Error("Error in storing the manifest in the repository")
 		}
 		var errRemoveSchedule error
@@ -341,10 +344,12 @@ func ConvertWish(wish WishFriendly, convertAgain, forceDownload, convertSingular
 			errRemoveSchedule = AddManifestToRemoveScheduler(wish.CvmfsRepo, manifest)
 			if errRemoveSchedule != nil {
 				Log().Warning("Error in adding the image to the remove schedule")
+				return errRemoveSchedule
 			}
 		}
 		if errIng == nil && errRemoveSchedule == nil {
 			Log().Info("Conversion completed")
+			return nil
 		}
 		return
 	} else {
