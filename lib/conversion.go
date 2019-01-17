@@ -193,6 +193,9 @@ func ConvertWish(wish WishFriendly, convertAgain, forceDownload, convertSingular
 
 	// this wil start to feed the above goroutine by writing into layersChanell
 	err = inputImage.GetLayers(layersChanell, manifestChanell, stopGettingLayers, tmpDir)
+	if err != nil {
+		return err
+	}
 
 	var singularity Singularity
 	if convertSingularity {

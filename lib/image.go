@@ -2,6 +2,7 @@ package lib
 
 import (
 	"compress/gzip"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -418,12 +419,32 @@ func (img Image) GetLayers(layersChan chan<- downloadedLayer, manifestChan chan<
 		return err
 	}
 
+	killKiller := make(chan bool, 1)
+	errorChannel := make(chan error, 1)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	go func() {
+
+		select {
+
+		case <-killKiller:
+			return
+		case <-stopGettingLayers:
+			err := fmt.Errorf("Detect errors, stop getting layer")
+			errorChannel <- err
+			LogE(err).Error("Detect error, stop getting layers")
+			cancel()
+			return
+		}
+	}()
+	defer func() { killKiller <- true }()
+
 	var wg sync.WaitGroup
 	defer wg.Wait()
 	// at this point we iterate each layer and we download it.
 	for _, layer := range manifest.Layers {
 		wg.Add(1)
-		go func(layer da.Layer) {
+		go func(ctx context.Context, layer da.Layer) {
 			defer wg.Done()
 			Log().WithFields(log.Fields{"layer": layer.Digest}).Info("Start working on layer")
 			toSend, err := img.downloadLayer(layer, token, rootPath)
@@ -431,8 +452,13 @@ func (img Image) GetLayers(layersChan chan<- downloadedLayer, manifestChan chan<
 				LogE(err).Error("Error in downloading a layer")
 				return
 			}
-			layersChan <- toSend
-		}(layer)
+			select {
+			case layersChan <- toSend:
+				return
+			case <-ctx.Done():
+				return
+			}
+		}(ctx, layer)
 	}
 
 	// finally we marshal the manifest and store it into a file
@@ -449,7 +475,15 @@ func (img Image) GetLayers(layersChan chan<- downloadedLayer, manifestChan chan<
 	}
 	// ship the manifest file
 	manifestChan <- manifestPath
-	return nil
+
+	// we wait here to make sure that the channel is populated
+	wg.Wait()
+	select {
+	case err := <-errorChannel:
+		return err
+	default:
+		return nil
+	}
 }
 
 func (img Image) downloadLayer(layer da.Layer, token, rootPath string) (toSend downloadedLayer, err error) {
