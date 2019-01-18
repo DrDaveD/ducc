@@ -15,7 +15,7 @@ import (
 	da "github.com/cvmfs/ducc/docker-api"
 )
 
-var dirPermision = os.FileMode(0744)
+var dirPermision = os.FileMode(0755)
 var filePermision = os.FileMode(0644)
 
 // ingest into the repository, inside the subpath, the target (directory or file) object
