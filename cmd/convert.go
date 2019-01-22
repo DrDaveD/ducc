@@ -10,6 +10,14 @@ import (
 	"github.com/cvmfs/ducc/lib"
 )
 
+// errors
+var (
+	NoPasswordError      = 101
+	GetRecipeFileError   = 102
+	ParseRecipeFileError = 103
+	RepoNotExistsError   = 104
+)
+
 var (
 	convertAgain, overwriteLayer, convertSingularity bool
 )
@@ -27,17 +35,32 @@ var convertCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		AliveMessage()
+
+		_, err := lib.GetPassword()
+		if err != nil {
+			lib.LogE(err).Error("No password provide to upload the docker images")
+			os.Exit(NoPasswordError)
+		}
+
 		defer lib.ExecCommand("docker", "system", "prune", "--force", "--all")
 
 		data, err := ioutil.ReadFile(args[0])
 		if err != nil {
-			lib.LogE(err).Fatal("Impossible to read the recipe file")
-			os.Exit(1)
+			lib.LogE(err).Error("Impossible to read the recipe file")
+			os.Exit(GetRecipeFileError)
 		}
 		recipe, err := lib.ParseYamlRecipeV1(data)
 		if err != nil {
-			lib.LogE(err).Fatal("Impossible to parse the recipe file")
-			os.Exit(1)
+			lib.LogE(err).Error("Impossible to parse the recipe file")
+			os.Exit(ParseRecipeFileError)
+		}
+		if len(recipe.Wishes) == 0 {
+			lib.Log().Info("No recipe to convert")
+			os.Exit(0)
+		}
+		if !lib.RepositoryExists(recipe.Wishes[0].CvmfsRepo) {
+			lib.LogE(err).Error("The repository does not seems to exists.")
+			os.Exit(RepoNotExistsError)
 		}
 		for _, wish := range recipe.Wishes {
 			fields := log.Fields{"input image": wish.InputName,

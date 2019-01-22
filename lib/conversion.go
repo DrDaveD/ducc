@@ -20,6 +20,8 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+var NoPasswordError = 101
+
 type ConversionResult int
 
 const (
@@ -50,7 +52,7 @@ func ConvertWish(wish WishFriendly, convertAgain, forceDownload, convertSingular
 	if err != nil {
 		return
 	}
-	password, err := getPassword()
+	password, err := GetPassword()
 	if err != nil {
 		return
 	}
@@ -397,7 +399,7 @@ func AlreadyConverted(CVMFSRepo string, img Image, reference string) ConversionR
 	return ConversionNotMatch
 }
 
-func getPassword() (string, error) {
+func GetPassword() (string, error) {
 	envVar := "DOCKER2CVMFS_DOCKER_REGISTRY_PASS"
 	pass := os.Getenv(envVar)
 	if pass == "" {

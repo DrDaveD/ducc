@@ -494,3 +494,19 @@ func CreateCatalogIntoDir(CVMFSRepo, dir string) (err error) {
 	}
 	return nil
 }
+
+func RepositoryExists(CVMFSRepo string) bool {
+	cmd := ExecCommand("cvmfs_server", "list")
+	err, stdout, _ := cmd.StartWithOutput()
+	if err != nil {
+		LogE(fmt.Errorf("Error in listing the repository")).Error("Repo not present")
+		return false
+	}
+	stdoutString := string(stdout.Bytes())
+
+	if strings.Contains(stdoutString, CVMFSRepo) {
+		return true
+	} else {
+		return false
+	}
+}
