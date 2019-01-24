@@ -265,6 +265,10 @@ definitions:
               - "rshared"
               - "slave"
               - "rslave"
+          NonRecursive:
+            description: "Disable recursive bind mount."
+            type: "boolean"
+            default: false
       VolumeOptions:
         description: "Optional configuration for the `volume` type."
         type: "object"
@@ -423,6 +427,11 @@ definitions:
         format: "int64"
       KernelMemory:
         description: "Kernel memory limit in bytes."
+        type: "integer"
+        format: "int64"
+        example: 209715200
+      KernelMemoryTCP:
+        description: "Hard limit for kernel TCP buffer memory (in bytes)."
         type: "integer"
         format: "int64"
       MemoryReservation:
@@ -1475,11 +1484,9 @@ definitions:
             type: "string"
       Options:
         description: "Driver-specific options, specified as a map."
-        type: "array"
-        items:
-          type: "object"
-          additionalProperties:
-            type: "string"
+        type: "object"
+        additionalProperties:
+          type: "string"
 
   NetworkContainer:
     type: "object"
@@ -2461,6 +2468,31 @@ definitions:
         description: "Whether there is currently a root CA rotation in progress for the swarm"
         type: "boolean"
         example: false
+      DataPathPort:
+        description: |
+          DataPathPort specifies the data path port number for data traffic.
+          Acceptable port range is 1024 to 49151.
+          If no port is set or is set to 0, the default port (4789) is used.
+        type: "integer"
+        format: "uint32"
+        default: 4789
+        example: 4789
+      DefaultAddrPool:
+        description: |
+          Default Address Pool specifies default subnet pools for global scope networks.
+        type: "array"
+        items:
+          type: "string"
+          format: "CIDR"
+          example: ["10.10.0.0/16", "20.20.0.0/16"]
+      SubnetSize:
+        description: |
+          SubnetSize specifies the subnet size of the networks created from the default subnet pool
+        type: "integer"
+        format: "uint32"
+        maximum: 29
+        default: 24
+        example: 24
 
   JoinTokens:
     description: |
@@ -2844,6 +2876,11 @@ definitions:
                   SpreadDescriptor: "node.labels.datacenter"
               - Spread:
                   SpreadDescriptor: "node.labels.rack"
+          MaxReplicas:
+            description: "Maximum number of replicas for per node (default value is 0, which is unlimited)"
+            type: "integer"
+            format: "int64"
+            default: 0
           Platforms:
             description: |
               Platforms stores all the platforms that the service's image can
@@ -6416,7 +6453,7 @@ paths:
           type: "string"
           description: |
             A JSON encoded value of the filters (a `map[string][]string`) to process on the list of build cache objects. Available filters:
-            - `unused-for=<duration>`: duration relative to daemon's time, during which build cache was not used, in Go's duration format (e.g., '24h')
+            - `until=<duration>`: duration relative to daemon's time, during which build cache was not used, in Go's duration format (e.g., '24h')
             - `id=<id>`
             - `parent=<id>`
             - `type=<string>`
@@ -8857,6 +8894,13 @@ paths:
                   nodes in order to reach the containers running on this node. Using this parameter it is possible to
                   separate the container data traffic from the management traffic of the cluster.
                 type: "string"
+              DataPathPort:
+                description: |
+                  DataPathPort specifies the data path port number for data traffic.
+                  Acceptable port range is 1024 to 49151.
+                  if no port is set or is set to 0, default port 4789 will be used.
+                type: "integer"
+                format: "uint32"
               DefaultAddrPool:
                 description: |
                   Default Address Pool specifies default subnet pools for global scope networks.
@@ -8877,6 +8921,7 @@ paths:
             example:
               ListenAddr: "0.0.0.0:2377"
               AdvertiseAddr: "192.168.1.1:2377"
+              DataPathPort: 4789
               DefaultAddrPool: ["10.10.0.0/8", "20.20.0.0/8"]
               SubnetSize: 24
               ForceNewCluster: false
@@ -9722,6 +9767,7 @@ paths:
           description: "Only return this number of log lines from the end of the logs. Specify as an integer or `all` to output all log lines."
           type: "string"
           default: "all"
+      tags: ["Task"]
   /secrets:
     get:
       summary: "List secrets"

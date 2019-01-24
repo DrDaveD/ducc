@@ -13,11 +13,12 @@
   packages = [
     "devices",
     "driver",
+    "fs",
     "pathdriver",
     "syscallx",
     "sysx"
   ]
-  revision = "bea7585dbfac2847dbf49a6b8e7738a36c09bc75"
+  revision = "004b46473808b3e7a4a3049c20e4376c91eb966d"
 
 [[projects]]
   name = "github.com/docker/distribution"
@@ -26,8 +27,8 @@
     "digestset",
     "reference"
   ]
-  revision = "17b3ff188dfde7d5b59a94ab99e6a967b3a59563"
-  version = "v2.7.0-rc.0"
+  revision = "2461543d988979529609e8cb6fca9ca190dc48da"
+  version = "v2.7.1"
 
 [[projects]]
   branch = "master"
@@ -56,6 +57,7 @@
     "image",
     "layer",
     "oci",
+    "oci/caps",
     "pkg/archive",
     "pkg/chrootarchive",
     "pkg/containerfs",
@@ -76,7 +78,7 @@
     "pkg/useragent",
     "plugin/v2"
   ]
-  revision = "12bba16306dd618883fe2e85ef1730efc572294f"
+  revision = "de86ba27fbea7a0876066d14220a22fdb1fd8295"
 
 [[projects]]
   name = "github.com/docker/go-connections"
@@ -97,8 +99,8 @@
 [[projects]]
   name = "github.com/gogo/protobuf"
   packages = ["proto"]
-  revision = "636bf0302bc95575d69441b25a2603156ffdddf1"
-  version = "v1.1.1"
+  revision = "4cbf7e384e768b4e01799441fdf2a706a5635ae7"
+  version = "v1.2.0"
 
 [[projects]]
   name = "github.com/inconshreveable/mousetrap"
@@ -115,8 +117,8 @@
 [[projects]]
   name = "github.com/mattn/go-runewidth"
   packages = ["."]
-  revision = "ce7b0b5c7b45a81508558cd1dba6bb1e4ddb51bb"
-  version = "v0.0.3"
+  revision = "3ee7d812e62a0804a7d0a324e0249ca2db3476d3"
+  version = "v0.0.4"
 
 [[projects]]
   name = "github.com/mattn/go-shellwords"
@@ -171,14 +173,14 @@
 [[projects]]
   name = "github.com/pkg/errors"
   packages = ["."]
-  revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
-  version = "v0.8.0"
+  revision = "ba968bfe8b2f7e042a574c888954fccecfa385b4"
+  version = "v0.8.1"
 
 [[projects]]
   name = "github.com/sirupsen/logrus"
   packages = ["."]
-  revision = "bcd833dfe83d3cebad139e4a29ed79cb2318bf95"
-  version = "v1.2.0"
+  revision = "e1e72e9de974bd926e5c56f83753fba2df402ce5"
+  version = "v1.3.0"
 
 [[projects]]
   name = "github.com/spf13/cobra"
@@ -193,20 +195,26 @@
   version = "v1.0.3"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/syndtr/gocapability"
+  packages = ["capability"]
+  revision = "d98352740cb2c55f81556b63d4a1ec64c5a319c2"
+
+[[projects]]
   name = "github.com/vbatts/tar-split"
   packages = [
     "archive/tar",
     "tar/asm",
     "tar/storage"
   ]
-  revision = "61b49a82bb343c846b8dd388c20187c7b3f3c7b5"
-  version = "v0.11.0"
+  revision = "620714a4c508c880ac1bdda9c8370a2b19af1a55"
+  version = "v0.11.1"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
-  revision = "4d3f4d9ffa16a13f451c3b2999e9c49e9750bf06"
+  revision = "057139ce5d2bdbe6fe73c53679e24e9cf007f637"
 
 [[projects]]
   branch = "master"
@@ -215,7 +223,13 @@
     "internal/socks",
     "proxy"
   ]
-  revision = "10aee181995363b41f712a55844a0dd52ea04646"
+  revision = "ed066c81e75eba56dd9bd2139ade88125b855585"
+
+[[projects]]
+  branch = "master"
+  name = "golang.org/x/sync"
+  packages = ["errgroup"]
+  revision = "37e7f081c4d4c64e13b10787722085407fe5d15f"
 
 [[projects]]
   branch = "master"
@@ -225,13 +239,13 @@
     "windows",
     "windows/registry"
   ]
-  revision = "3a76605856fddce5718553cbb8bd50ca492a7274"
+  revision = "b90733256f2e882e81d52f9126de08df5615afd9"
 
 [[projects]]
   name = "gopkg.in/yaml.v2"
   packages = ["."]
-  revision = "5420a8b6744d3b0345ab293f6fcba19c978f1183"
-  version = "v2.2.1"
+  revision = "51d6538a90f86fe93ac480b35f37b2be17fef232"
+  version = "v2.2.2"
 
 [solve-meta]
   analyzer-name = "dep"
